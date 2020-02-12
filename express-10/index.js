@@ -3,7 +3,7 @@ const app = express()
 const router = require('./router.js')
 const fs = require('fs')
 
-app.use('/', (req, res, next) => {
+app.use((req, res, next) => {
     let data = req.url + " visited at " + new Date().toISOString() + "\r"
     fs.appendFile('./access.log', data, (err) => {
         if (err) console.error(err)
