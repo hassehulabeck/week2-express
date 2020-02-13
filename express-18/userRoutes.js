@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 let users = require('./users.json')
+const secret = require('./secret.js')
 
 function getUser(req) {
     // Hämta ut en användare utifrån id.
@@ -10,18 +11,41 @@ function getUser(req) {
     return user
 }
 
+/* Funktionen auth kollar upp om användaren är betrodd, dvs om värdet till egenskaperna id och pw matchar de som vi lagrar i filen secret.js
+Om så är fallet returnerar vi true, vilket gör att vi kan köra .post och .delete för "/users".
+Autentisering är inte aktiverad för "/users/:userID", enbart för att visa på skillnaden. */
+
+function auth(req) {
+    if (req.body.id == secret.id && req.body.pw == secret.pw) {
+        // Ta bort dessa egenskaper, då de annars åker med in i users-objektet.
+        // Alternativt, rensa i .post-delen av koden.
+        delete req.body.id
+        delete req.body.pw
+        return true
+    }
+}
+
 router.route('/users')
     .get((req, res, next) => {
         res.json(users)
     })
     .post((req, res, next) => {
-        // Vi förutsätter att all data är OK...
-        users.push(req.body)
-        res.end("User inserted")
+        // Kolla om användaren är betrodd att posta.
+        if (auth(req)) {
+            // Vi förutsätter att all data är OK...
+            users.push(req.body)
+            res.end("User inserted")
+        } else {
+            res.status(401).end("Not authorized")
+        }
     })
     .delete((req, res, next) => {
-        users = []
-        res.end("Galning, du har raderat alla användare!")
+        if (auth(req)) {
+            users = []
+            res.end("Galning, du har raderat alla användare!")
+        } else {
+            res.status(401).end("Not authorized")
+        }
     })
 
 router.route('/users/:userID')
