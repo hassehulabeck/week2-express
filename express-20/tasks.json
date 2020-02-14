@@ -1,0 +1,11 @@
+[{
+        "id": "ABC",
+        "task": "Tvätta katten",
+        "isDone": true
+    },
+    {
+        "id": 0,
+        "task": "Klappa katten",
+        "isDone": false
+    }
+]
